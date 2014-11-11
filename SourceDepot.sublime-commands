@@ -1,22 +1,22 @@
 [
 {
 	"caption" : "Source Depot: Add",
-	"command" : "add"
+	"command" : "sd_add"
 },
 {
 	"caption" : "Source Depot: Edit",
-	"command" : "edit"
+	"command" : "sd_edit"
 },
 {
 	"caption" : "Source Depot: Revert",
-	"command" : "revert"
+	"command" : "sd_revert"
 },
 {
 	"caption" : "Source Depot: Changes",
-	"command" : "changes"
+	"command" : "sd_changes"
 },
 {
 	"caption" : "Source Depot: Opened",
-	"command" : "opened"
+	"command" : "sd_opened"
 }
 ]
