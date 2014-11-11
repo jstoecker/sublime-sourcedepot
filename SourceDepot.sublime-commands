@@ -1,0 +1,22 @@
+[
+{
+	"caption" : "Source Depot: Add",
+	"command" : "add"
+},
+{
+	"caption" : "Source Depot: Edit",
+	"command" : "edit"
+},
+{
+	"caption" : "Source Depot: Revert",
+	"command" : "revert"
+},
+{
+	"caption" : "Source Depot: Changes",
+	"command" : "changes"
+},
+{
+	"caption" : "Source Depot: Opened",
+	"command" : "opened"
+}
+]
