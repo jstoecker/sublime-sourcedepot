@@ -1,9 +1,5 @@
 [
 {
-	"caption" : "Source Depot: Add",
-	"command" : "sd_add"
-},
-{
 	"caption" : "Source Depot: Edit",
 	"command" : "sd_edit"
 },
@@ -12,11 +8,19 @@
 	"command" : "sd_revert"
 },
 {
-	"caption" : "Source Depot: Changes",
-	"command" : "sd_changes"
+	"caption" : "Source Depot: Add",
+	"command" : "sd_add"
 },
 {
-	"caption" : "Source Depot: Opened",
-	"command" : "sd_opened"
+	"caption" : "Source Depot Visual: Opened",
+	"command" : "sdv_opened"
+},
+{
+	"caption" : "Source Depot Visual: Graph",
+	"command" : "sdv_graph"
+},
+{
+	"caption" : "Source Depot Visual: Changes",
+	"command" : "sdv_changes"
 }
 ]

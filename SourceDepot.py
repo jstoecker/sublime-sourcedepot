@@ -1,64 +1,85 @@
-import sublime, sublime_plugin, subprocess, os
+import sublime
+import sublime_plugin
+import subprocess
+import threading
+import os
 
+# Replace these with your own %SDXROOT%
+# TODO: there's got to be a better way than this, but launching a new razzle is
+# too slow.
+sd_path = "s:\\fbl_grfx_dev\\tools\\amd64\\sd"
+sdv_path = "s:\\fbl_grfx_dev\\tools\\x86\\sdv"
 
-# ----------------------------------------------------------------------------
-def output_to_panel(edit, text):
-	panel_name = 'source_depot'
-	window = sublime.active_window()
-	panel = window.get_output_panel(panel_name)
-	panel.insert(edit, panel.size(), text)
-	window.run_command('show_panel', {'panel': 'output.' + panel_name})
+# ------------------------------------------------------------------------------
+# Helper Functions
+# ------------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------
-def run_cmd(edit, command, directory, show_output=True):
-	proc = subprocess.Popen("cmd.exe /c " + command,
-							cwd=directory,
-							shell=True, 
-							stdout=subprocess.PIPE, 
-							stderr=subprocess.PIPE, 
-							universal_newlines=True)
+def WriteToPanel(edit, text):
+    panel_name = "source_depot"
+    window = sublime.active_window()
+    panel = window.get_output_panel(panel_name)
+    panel.insert(edit, panel.size(), text)
+    window.run_command("show_panel", {"panel": "output." + panel_name})
 
-	if show_output:
-		output, error = proc.communicate()
-		if len(error) == 0:
-			output_to_panel(edit, output)
-		else:
-			output_to_panel(edit, "ERROR:\n" + error)
+def RunSdvCommand(command, directory, file=""):
+    subprocess.Popen(
+        "cmd.exe /c %s %s %s" % (sdv_path, command, file),
+        cwd = directory,
+        shell = True,
+        universal_newlines = True)
 
+def RunSdvCommandOnFile(command, filename):
+    directory, file = os.path.split(filename)
+    RunSdvCommand(command, directory, file)
 
-# ----------------------------------------------------------------------------
-class SdAddCommand(sublime_plugin.TextCommand):
-	def run(self, edit):
-		dir, file = os.path.split(self.view.file_name())
-		run_cmd(edit, "sd add " + file, dir)
+def RunSdvCommandOnDirectory(command, filename):
+    directory, file = os.path.split(filename)
+    RunSdvCommand(command, directory)
 
-# ----------------------------------------------------------------------------
+def RunSdCommandOnFile(command, filename):
+    directory, file = os.path.split(filename)
+    proc = subprocess.Popen(
+        "cmd.exe /c %s %s %s" % (sd_path, command, file),
+        cwd = directory,
+        shell = True,
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE,
+        universal_newlines = True)
+    output, error = proc.communicate()
+    result = output if len(error) == 0 else error
+    return result
+
+# ------------------------------------------------------------------------------
+# SD Commands
+# ------------------------------------------------------------------------------
+
 class SdEditCommand(sublime_plugin.TextCommand):
-	def run(self, edit):
-		dir, file = os.path.split(self.view.file_name())
-		run_cmd(edit, "sd edit " + file, dir)
+    def run(self, edit):
+        result = RunSdCommandOnFile("edit", self.view.file_name())
+        WriteToPanel(edit, result)
 
-# ----------------------------------------------------------------------------
 class SdRevertCommand(sublime_plugin.TextCommand):
-	def run(self, edit):
-		dir, file = os.path.split(self.view.file_name())
-		run_cmd(edit, "sd revert " + file, dir)
+    def run(self, edit):
+        result = RunSdCommandOnFile("revert", self.view.file_name())
+        WriteToPanel(edit, result)
 
-# ----------------------------------------------------------------------------
-class SdChangesCommand(sublime_plugin.TextCommand):
-	def run(self, edit):
-		dir, file = os.path.split(self.view.file_name())
-		run_cmd(edit, "sd changes " + file, dir)
+class SdAddCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        result = RunSdCommandOnFile("add", self.view.file_name())
+        WriteToPanel(edit, result)
 
-# ----------------------------------------------------------------------------
-class SdOpenedCommand(sublime_plugin.TextCommand):
-	def run(self, edit):
-		dir, file = os.path.split(self.view.file_name())
-		run_cmd(edit, "sd opened", dir)
+# ------------------------------------------------------------------------------
+# SDV Commands
+# ------------------------------------------------------------------------------
 
+class SdvChangesCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        RunSdvCommandOnFile("changes", self.view.file_name())
 
+class SdvGraphCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        RunSdvCommandOnFile("graph", self.view.file_name())
 
-
-#TODO
-#	one command with an argument called from the other file
-# 	diff
+class SdvOpenedCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        RunSdvCommandOnDirectory("opened", self.view.file_name())
